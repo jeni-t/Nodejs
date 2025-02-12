@@ -5,6 +5,7 @@ const mongodb = require("mongodb")
 const MongoClient = mongodb.MongoClient
 const app = express()
 const dotenv = require("dotenv").config()
+const Recipe = require("./models/CreateRecipe");
 
 console.log(process.env.DB)
 const url = process.env.DB
@@ -20,13 +21,25 @@ app.use(
 
 let products = []
 
-app.get("/products",(req,res)=>{
-    res.json(products)
+
+app.post("/recipe",async(req,res)=>{
+    try{
+        const user = new Recipe({
+            title: req.body.title,
+            ingredients: req.body.ingredients,
+            instructions: req.body.instructions,
+        })
+
+        await Recipe.save()
+
+        res.json({message:"Recipe created successfully"})
+    }catch(error){
+res.status(500).json({message:"somthing went wrong"})
+    }
 })
 
-app.post("/product",(req,res)=>{
-    //req.body.id = products.length+1
-    products.push(req.body)
-    res.json({message:"product added successfully"})
+app.get("/recipes",async(req,res)=>{
+    let recipes = await Recipe.find()
+    res.json(recipes)
 })
 app.listen(3000)
